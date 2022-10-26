@@ -120,6 +120,8 @@
 #define SSP_DEBUG_TIME_FLAG_ON		"SSP:DEBUG_TIME=1"
 #define SSP_DEBUG_TIME_FLAG_OFF		"SSP:DEBUG_TIME=0"
 
+#define SSP_AUTO_ROTATION_ORIENTATION "SSP:AUTO_ROTATION_ORIENTATION="
+
 extern bool ssp_debug_time_flag;
 
 #define ssp_debug_time(format, ...) \
@@ -287,6 +289,8 @@ enum {
 #define GYROSCOPE_DPS_FACTORY	0x8B
 #define MCU_FACTORY		0x8C
 #define MCU_SLEEP_FACTORY		0x8D
+
+#define MSG2SSP_AUTO_ROTATION_ORIENTATION 0x9A
 
 /* Factory data length */
 #define ACCEL_FACTORY_DATA_LENGTH		1
@@ -538,6 +542,7 @@ struct sensor_value {
 		u8 tilt_detector;
 		u8 pickup_gesture;
 		u8 wakeup_motion;
+		u8 auto_rotation_event;
 		u8 scontext_buf[SCONTEXT_DATA_SIZE];
 		struct {
 			u8 proximity_pocket_detect;
@@ -1095,6 +1100,7 @@ int print_mcu_debug(char *pchRcvDataFrame, int *pDataIdx, int iRcvDataFrameLengt
 void report_temp_humidity_data(struct ssp_data *data, struct sensor_value *temp_humi_data);
 void report_shake_cam_data(struct ssp_data *data, struct sensor_value *shake_cam_data);
 void report_bulk_comp_data(struct ssp_data *data);
+void report_auto_rotation_data(struct ssp_data *data, struct sensor_value *auto_rotation_data);
 void report_tilt_data(struct ssp_data *data, struct sensor_value *tilt_data);
 void report_pickup_data(struct ssp_data *data, struct sensor_value *pickup_data);
 void report_scontext_data(struct ssp_data *data, struct sensor_value *scontextbuf);

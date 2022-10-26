@@ -579,13 +579,40 @@ static ssize_t set_mcu_power(struct device *dev,
 static ssize_t set_ssp_control(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t size)
 {
+	struct ssp_data *data = dev_get_drvdata(dev);
+	
 	pr_info("[SSP] SSP_CONTROL : %s\n", buf);
 
 	if (strstr(buf, SSP_DEBUG_TIME_FLAG_ON))
 		ssp_debug_time_flag = true;
 	else if (strstr(buf, SSP_DEBUG_TIME_FLAG_OFF))
 		ssp_debug_time_flag = false;
+	else if (strstr(buf, SSP_AUTO_ROTATION_ORIENTATION)) {
+		int len = strlen(SSP_AUTO_ROTATION_ORIENTATION);
+		int iRet = 0;
+		struct ssp_msg *msg = kzalloc(sizeof(*msg), GFP_KERNEL);
 
+		if (msg == NULL) {
+			iRet = -ENOMEM;
+			pr_err("[SSP] %s, failed to alloc memory for ssp_msg\n",
+				__func__);
+			return iRet;
+		}
+		msg->cmd = MSG2SSP_AUTO_ROTATION_ORIENTATION;
+		msg->length = 1;
+		msg->options = AP2HUB_WRITE;
+		msg->buffer = (char *)(buf + len);
+		msg->free_buffer = 0;
+
+		iRet = ssp_spi_async(data, msg);
+
+		if (iRet != SUCCESS) {
+			pr_err("[SSP]: %s - i2c fail %d\n", __func__, iRet);
+			return size;
+		} else {
+			pr_err("[SSP] %s, AUTO_ROTATION_ORIENTATION send success\n", __func__);
+		}
+	}
 	return size;
 }
 
