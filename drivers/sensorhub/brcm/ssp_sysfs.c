@@ -587,7 +587,19 @@ static ssize_t set_ssp_control(struct device *dev,
 		ssp_debug_time_flag = true;
 	else if (strstr(buf, SSP_DEBUG_TIME_FLAG_OFF))
 		ssp_debug_time_flag = false;
-	else if (strstr(buf, SSP_AUTO_ROTATION_ORIENTATION)) {
+	else if (strstr(buf, SSP_HALL_IC_ON) || strstr(buf, SSP_HALL_IC_OFF)) {
+		int iRet = 0;
+		data->hall_ic_status = strstr(buf, SSP_HALL_IC_ON) ? 1 : 0;
+	
+		iRet = send_hall_ic_status(data->hall_ic_status);
+
+		if (iRet != SUCCESS) {
+			pr_err("[SSP]: %s - hall ic command, failed %d\n", __func__, iRet);
+			return iRet;
+		}
+
+		pr_info("[SSP] %s HALL IC ON/OFF, %d enabled %d\n", __func__, iRet, data->hall_ic_status);
+	} else if (strstr(buf, SSP_AUTO_ROTATION_ORIENTATION)) {
 		int len = strlen(SSP_AUTO_ROTATION_ORIENTATION);
 		int iRet = 0;
 		struct ssp_msg *msg = kzalloc(sizeof(*msg), GFP_KERNEL);

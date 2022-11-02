@@ -120,6 +120,9 @@
 #define SSP_DEBUG_TIME_FLAG_ON		"SSP:DEBUG_TIME=1"
 #define SSP_DEBUG_TIME_FLAG_OFF		"SSP:DEBUG_TIME=0"
 
+#define SSP_HALL_IC_ON			"SSP:HALL_IC=1"
+#define SSP_HALL_IC_OFF			"SSP:HALL_IC=0"
+
 #define SSP_AUTO_ROTATION_ORIENTATION "SSP:AUTO_ROTATION_ORIENTATION="
 
 extern bool ssp_debug_time_flag;
@@ -250,6 +253,7 @@ enum {
 #define MSG2SSP_AP_IRDATA_SEND		0x38
 #define MSG2SSP_AP_IRDATA_SEND_RESULT 0x39
 #define MSG2SSP_AP_PROX_GET_TRIM	0x40
+#define MSG2SSP_HALL_IC_ON_OFF		0x96
 
 #define SH_MSG2AP_GYRO_CALIBRATION_START   0x43
 #define SH_MSG2AP_GYRO_CALIBRATION_STOP	0x44
@@ -940,6 +944,7 @@ struct ssp_data {
         bool IsAPsuspend;
 /* no ack about mcu_resp pin*/
         bool IsNoRespCnt;
+        bool hall_ic_status; // 0: open, 1: close
 };
 
 //#if defined (CONFIG_SENSORS_SSP_VLTE)
@@ -1176,4 +1181,5 @@ void set_AccelCalibrationInfoData(char *pchRcvDataFrame, int *iDataIdx);
 void set_GyroCalibrationInfoData(char *pchRcvDataFrame, int *iDataIdx);
 int send_vdis_flag(struct ssp_data *data, bool bFlag);
 
+int send_hall_ic_status(bool enable);
 #endif
