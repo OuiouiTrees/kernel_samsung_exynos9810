@@ -548,6 +548,10 @@ struct sensor_value {
 			u8 proximity_pocket_detect;
 			u16 proximity_pocket_adc;
 		} __attribute__((__packed__));
+		struct {
+			u8 prox;
+			u32 lux;
+		} __attribute__((__packed__)) pocket_mode_lite_t;
 		struct meta_data_event meta_data;
 	};
 	u64 timestamp;
@@ -1107,6 +1111,7 @@ void report_scontext_data(struct ssp_data *data, struct sensor_value *scontextbu
 void report_thermistor_data(struct ssp_data *data, struct sensor_value *thermistor_data);
 void report_uncalib_accel_data(struct ssp_data *data, struct sensor_value *acceldata);
 void report_wakeup_motion_data(struct ssp_data *data,struct sensor_value *wakeup_motion_data);
+void report_pocket_mode_lite_data(struct ssp_data *data, struct sensor_value *pocket_mode_lite_data);
 
 unsigned int get_module_rev(struct ssp_data *data);
 void reset_mcu(struct ssp_data *data);

@@ -373,6 +373,13 @@ static void get_ucal_accel_sensordata(char *pchRcvDataFrame, int *iDataIdx,
 	*iDataIdx += 12;
 }
 
+static void get_pocket_mode_lite_sensordata(char *pchRcvDataFrame, int *iDataIdx,
+	struct sensor_value *sensorsdata)
+{
+	memcpy(sensorsdata, pchRcvDataFrame + *iDataIdx, 5);
+	*iDataIdx += 5;
+}
+
 static void get_auto_rotation_data(char *pchRcvDataFrame, int *iDataIdx,
 	struct sensor_value *sensorsdata)
 {
@@ -902,6 +909,7 @@ void initialize_function_pointer(struct ssp_data *data)
 	data->get_sensor_data[WAKE_UP_MOTION] = get_wakeup_motion_sensordata;
 
 	data->get_sensor_data[AUTO_ROTATION_SENSOR] = get_auto_rotation_data;
+	data->get_sensor_data[POCKET_MODE_LITE] = get_pocket_mode_lite_sensordata;
 
 	data->get_sensor_data[BULK_SENSOR] = NULL;
 	data->get_sensor_data[GPS_SENSOR] = NULL;
@@ -950,6 +958,7 @@ void initialize_function_pointer(struct ssp_data *data)
 	data->report_sensor_data[ACCEL_UNCALIB_SENSOR] = report_uncalib_accel_data;
 	data->report_sensor_data[WAKE_UP_MOTION] = report_wakeup_motion_data;
 	data->report_sensor_data[AUTO_ROTATION_SENSOR] = report_auto_rotation_data;
+	data->report_sensor_data[POCKET_MODE_LITE] = report_pocket_mode_lite_data;
 
 	data->ssp_big_task[BIG_TYPE_DUMP] = ssp_dump_task;
 	data->ssp_big_task[BIG_TYPE_READ_LIB] = ssp_read_big_library_task;

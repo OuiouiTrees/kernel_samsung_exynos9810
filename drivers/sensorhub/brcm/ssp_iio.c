@@ -57,6 +57,7 @@ static struct sensor_info info_table[] = {
 	SENSOR_INFO_META,
 	SENSOR_INFO_WAKE_UP_MOTION, 
 	SENSOR_INFO_AUTO_ROTATION,
+	SENSOR_INFO_POCKET_MODE_LITE,
 };
 
 #define IIO_ST(si, rb, sb, sh)	\
@@ -413,6 +414,15 @@ void report_wakeup_motion_data(struct ssp_data *data,
 	report_iio_data(data, WAKE_UP_MOTION, wakeup_motion_data);
 	wake_lock_timeout(&data->ssp_wake_lock, 0.3*HZ);
 	pr_err("[SSP]: %s: %d", __func__,  wakeup_motion_data->wakeup_motion);
+}
+
+void report_pocket_mode_lite_data(struct ssp_data *data, struct sensor_value *pocket_mode_lite_data)
+{
+	report_iio_data(data, POCKET_MODE_LITE, pocket_mode_lite_data);
+	wake_lock_timeout(&data->ssp_wake_lock, 0.3*HZ);
+	pr_err("[SSP]: %s: %d %d ts: %llu", __func__,
+		pocket_mode_lite_data->pocket_mode_lite_t.prox, 
+		pocket_mode_lite_data->pocket_mode_lite_t.lux, pocket_mode_lite_data->timestamp);
 }
 
 void report_scontext_data(struct ssp_data *data,

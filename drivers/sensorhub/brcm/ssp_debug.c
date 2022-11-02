@@ -472,6 +472,12 @@ static void print_sensordata(struct ssp_data *data, unsigned int uSensor)
 			data->buf[uSensor].auto_rotation_event,
 			get_msdelay(data->adDelayBuf[uSensor]));
 		break;
+	case POCKET_MODE_LITE:
+		ssp_dbg("[SSP] %u : %d %d(%ums)\n", uSensor,
+		data->buf[uSensor].pocket_mode_lite_t.prox,
+		data->buf[uSensor].pocket_mode_lite_t.lux,
+		get_msdelay(data->adDelayBuf[uSensor]));
+		break;
 	case BULK_SENSOR:
 	case GPS_SENSOR:
 		break;
