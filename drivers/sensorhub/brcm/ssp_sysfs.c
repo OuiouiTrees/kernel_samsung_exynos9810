@@ -18,6 +18,7 @@
 #include <linux/string.h>
 #include "ssp_iio.h"
 #define BATCH_IOCTL_MAGIC		0xFC
+#define INJECTION_MODE_ADDITIONAL_INFO	 		1
 
 struct batch_config {
 	int64_t timeout;
@@ -321,13 +322,16 @@ static ssize_t show_sensors_enable(struct device *dev,
 static ssize_t set_sensors_enable(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t size)
 {
-	int64_t dTemp;
+	u64 dTemp;
 	u64 uNewEnable = 0;
 	unsigned int uChangedSensor = 0;
 	struct ssp_data *data = dev_get_drvdata(dev);
+	int ret = kstrtoull(buf, 10, &dTemp); 
 
-	if (kstrtoll(buf, 10, &dTemp) < 0)
-		return -EINVAL;
+	if (ret < 0) {
+		pr_info("[SSP] %s - kstrtoull failed (%d)\n", __func__, ret);
+		return ret;
+	}
 
 	uNewEnable = (u64)dTemp;
 	ssp_dbg("[SSP]: %s - new_enable = %llu, old_enable = %llu\n", __func__,
@@ -1107,74 +1111,49 @@ static struct file_operations const ssp_batch_fops = {
 static ssize_t ssp_data_injection_write(struct file *file, const char __user *buf,
 				size_t count, loff_t *pos)
 {
-	struct ssp_data *data
-		= container_of(file->private_data,
-			struct ssp_data, ssp_data_injection_device);
-
-	struct ssp_msg *msg;
 	int ret = 0;
-	char *send_buffer;
-	unsigned int sensor_type = 0;
-	size_t x = 0;
+	char *buffer;
 
-	if (unlikely(count < 4)) {
-		pr_err("[SSP] %s data length err(%d)\n", __func__, (u32)count);
+	if (unlikely(count < 2)) {
+		pr_err("[SSP]: inject data length err(%d)", (int)count);
 		return -EINVAL;
 	}
 
-	send_buffer = kcalloc(count, sizeof(char), GFP_KERNEL);
-	if (unlikely(!send_buffer)) {
-		pr_err("[SSP] %s allocate memory for kernel buffer err\n", __func__);
-		return -ENOMEM;
-	}
+	buffer = kzalloc(count * sizeof(char), GFP_KERNEL);
 
-	ret = copy_from_user(send_buffer, buf, count);
+	ret = copy_from_user(buffer, buf, count);
 	if (unlikely(ret)) {
-		pr_err("[SSP] %s memcpy for kernel buffer err\n", __func__);
+		pr_err("[SSP]: memcpy for kernel buffer err");
 		ret = -EFAULT;
 		goto exit;
 	}
 
-	pr_info("[SSP] %s count %d endable %d\n", __func__, (u32)count, data->data_injection_enable);
-
-// sensorhub sensor type is enum, HAL layer sensor type is 1 << sensor_type. So it needs to change to enum format.
-	for (sensor_type = 0; sensor_type < SENSOR_MAX; sensor_type++) {
-		if (send_buffer[0] == (1 << sensor_type)) {
-			send_buffer[0] = sensor_type; // sensor type change to enum format.
-			pr_info("[SSP] %s sensor_type = %d %d\n", __func__, sensor_type, (1 << sensor_type));
-			break;
-		}
-		if (sensor_type == SENSOR_MAX - 1)
-			pr_info("[SSP] %s there in no sensor_type\n", __func__);
-	}
-
-	for (x = 0; x < count; x++)
-		pr_info("[SSP] %s Data Injection : %d 0x%x\n", __func__, send_buffer[x], send_buffer[x]);
-
-
-	// injection data send to sensorhub.
-	msg = kzalloc(sizeof(*msg), GFP_KERNEL);
-	msg->cmd = MSG2SSP_AP_DATA_INJECTION_SEND;
-	msg->length = count;
-	msg->options = AP2HUB_WRITE;
-	msg->buffer = kzalloc(count, GFP_KERNEL);
-	msg->free_buffer = 1;
-
-	memcpy(msg->buffer, send_buffer, count);
-
-	ret = ssp_spi_async(data, msg);
-
-	if (ret != SUCCESS) {
-		pr_err("[SSP]: %s - Data Injection fail %d\n", __func__, ret);
+	if (buffer[0] == INJECTION_MODE_ADDITIONAL_INFO) {
+		ret = 0;
+	} else {
+		pr_err("[SSP]: invalid command from hal (%x)", (int)buffer[0]);
+		ret = -EINVAL;
 		goto exit;
-		//return ret;
 	}
 
-	pr_info("[SSP] %s Data Injection Success %d\n", __func__, ret);
+	if (unlikely(ret < 0)) {
+		pr_err("[SSP]: inject data err(%d)", ret);
+		if (ret == ERROR) {
+			ret = -EIO;
+		}
+		
+		else if (ret == FAIL) {
+			ret = -EAGAIN;
+		}
+
+		goto exit;
+	}
+
+	ret = count;
 
 exit:
-	kfree(send_buffer);
-	return ret >= 0 ? 0 : -1;
+	kfree(buffer);
+	return ret;
 }
 
 #if 0
