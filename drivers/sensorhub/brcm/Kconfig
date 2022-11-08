@@ -597,39 +597,6 @@ config SENSORS_SSP_GREAT
 	  To compile this driver as a module, choose M here: the
 	  module will be called ssp.
 
-config SENSORS_SSP_STAR
-	tristate "STAR Project"
-	default n
-	depends on SPI
-	help
-	  Binary file for ssp driver.
-          If you say yes here you get STAR project support for
-	  factory test.
-	  To compile this driver as a module, choose M here: the
-	  module will be called ssp.
-	  
-config SENSORS_SSP_CROWN
-	tristate "CROWN Project"
-	default n
-	depends on SPI
-	help
-	  Binary file for ssp driver.
-          If you say yes here you get STAR project support for
-	  factory test.
-	  To compile this driver as a module, choose M here: the
-	  module will be called ssp.
-	  
-config SENSORS_SSP_HAECHI
-	tristate "HAECHI Project"
-	default n
-	depends on SPI
-	help
-	  Binary file for ssp driver.
-          If you say yes here you get STAR project support for
-	  factory test.
-	  To compile this driver as a module, choose M here: the
-	  module will be called ssp.
-
 config SENSORS_SSP_LUGE
 	tristate "DREAM Project"
 	default n
